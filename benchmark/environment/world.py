@@ -1677,8 +1677,7 @@ class World(object):
 
         player_loc = self.player.get_location()
         breaking_point = carla.Location(player_loc.x,self.desc_p.y+self.db[0], 0.5)
-        # car_behave = conf.char == "forcing"
-        car_behave = True
+        car_behave = conf.char == "forcing"
         car_to_desc = self.player.get_location().y-self.desc_p.y-self.db[1]
         ped_to_desc = l2_distance(self.walker.get_location(), self.desc_p)
         ped_time = ped_to_desc/self.ped_speed

@@ -144,7 +144,7 @@ class Scenario:
         car = [random.choice(car_bp), car_spawn_point]
         obstacles.append(car)
 
-        return 7, obstacles, end, start
+        return 8, obstacles, end, start
 
     def scenario07(self):
         start = (-2.0, 270, -90)
@@ -282,8 +282,8 @@ class Scenario:
         obstacles = []
 
         walker_bp = self.world.get_blueprint_library().filter("walker.pedestrian.0001")[0]
-        if walker_bp.has_attribute('is_invincible'):
-            walker_bp.set_attribute('is_invincible', 'false')  
+        if walker_bp.has_attribute("is_invincible"):
+            walker_bp.set_attribute("is_invincible", "false")
         walker_spawn_point = carla.Transform()
         walker_spawn_point.location.x = 85
         walker_spawn_point.location.y = 300
@@ -300,8 +300,8 @@ class Scenario:
         obstacles = []
 
         walker_bp = self.world.get_blueprint_library().filter("walker.pedestrian.0001")[0]
-        if walker_bp.has_attribute('is_invincible'):
-            walker_bp.set_attribute('is_invincible', 'false')  
+        if walker_bp.has_attribute("is_invincible"):
+            walker_bp.set_attribute("is_invincible", "false")
         walker_spawn_point = carla.Transform()
         walker_spawn_point.location.x = 85
         walker_spawn_point.location.y = 300
@@ -312,15 +312,14 @@ class Scenario:
 
         return "02_int", obstacles, end, start
 
-
     def scenario03_int(self):
         start = (92.5, 300, -90)
         end = (92.5, 200, -90)
         obstacles = []
 
         walker_bp = self.world.get_blueprint_library().filter("walker.pedestrian.0001")[0]
-        if walker_bp.has_attribute('is_invincible'):
-            walker_bp.set_attribute('is_invincible', 'false')  
+        if walker_bp.has_attribute("is_invincible"):
+            walker_bp.set_attribute("is_invincible", "false")
         walker_spawn_point = carla.Transform()
         walker_spawn_point.location.x = 107
         walker_spawn_point.location.y = 300
@@ -337,8 +336,8 @@ class Scenario:
         obstacles = []
 
         walker_bp = self.world.get_blueprint_library().filter("walker.pedestrian.0001")[0]
-        if walker_bp.has_attribute('is_invincible'):
-            walker_bp.set_attribute('is_invincible', 'false')
+        if walker_bp.has_attribute("is_invincible"):
+            walker_bp.set_attribute("is_invincible", "false")
         walker_spawn_point = carla.Transform()
         walker_spawn_point.location.x = 85
         walker_spawn_point.location.y = 300
@@ -354,8 +353,8 @@ class Scenario:
         end = (92.5, 200, -90)
         obstacles = []
         walker_bp = self.world.get_blueprint_library().filter("walker.pedestrian.0001")[0]
-        if walker_bp.has_attribute('is_invincible'):
-            walker_bp.set_attribute('is_invincible', 'false')
+        if walker_bp.has_attribute("is_invincible"):
+            walker_bp.set_attribute("is_invincible", "false")
         walker_spawn_point = carla.Transform()
         walker_spawn_point.location.x = 85
         walker_spawn_point.location.y = 280
@@ -365,15 +364,14 @@ class Scenario:
         obstacles.append(walker)
         return "05_int", obstacles, end, start
 
-
     def scenario06_int(self):
         start = (92.5, 300, -90)
         end = (92.5, 200, -90)
         obstacles = []
 
         walker_bp = self.world.get_blueprint_library().filter("walker.pedestrian.0001")[0]
-        if walker_bp.has_attribute('is_invincible'):
-            walker_bp.set_attribute('is_invincible', 'false')
+        if walker_bp.has_attribute("is_invincible"):
+            walker_bp.set_attribute("is_invincible", "false")
         walker_spawn_point = carla.Transform()
         walker_spawn_point.location.x = 85
         walker_spawn_point.location.y = 300
@@ -384,16 +382,13 @@ class Scenario:
 
         return "06_int", obstacles, end, start
 
-
-
-    
     def scenario01_non_int(self):
         start = (92.5, 300, -90)
         end = (92.5, 200, -90)
         obstacles = []
         walker_bp = self.world.get_blueprint_library().filter("walker.pedestrian.0001")[0]
-        if walker_bp.has_attribute('is_invincible'):
-            walker_bp.set_attribute('is_invincible', 'false')  
+        if walker_bp.has_attribute("is_invincible"):
+            walker_bp.set_attribute("is_invincible", "false")
         walker_spawn_point = carla.Transform()
         walker_spawn_point.location.x = 96
         walker_spawn_point.location.y = 300
@@ -404,14 +399,13 @@ class Scenario:
 
         return "01_non_int", obstacles, end, start
 
-
     def scenario02_non_int(self):
         start = (92.5, 300, -90)
         end = (92.5, 200, -90)
         obstacles = []
         walker_bp = self.world.get_blueprint_library().filter("walker.pedestrian.0001")[0]
-        if walker_bp.has_attribute('is_invincible'):
-            walker_bp.set_attribute('is_invincible', 'false')  
+        if walker_bp.has_attribute("is_invincible"):
+            walker_bp.set_attribute("is_invincible", "false")
         walker_spawn_point = carla.Transform()
         walker_spawn_point.location.x = 85
         walker_spawn_point.location.y = 300
@@ -427,8 +421,8 @@ class Scenario:
         end = (92.5, 200, -90)
         obstacles = []
         walker_bp = self.world.get_blueprint_library().filter("walker.pedestrian.0001")[0]
-        if walker_bp.has_attribute('is_invincible'):
-            walker_bp.set_attribute('is_invincible', 'false')  
+        if walker_bp.has_attribute("is_invincible"):
+            walker_bp.set_attribute("is_invincible", "false")
         walker_spawn_point = carla.Transform()
         walker_spawn_point.location.x = 96
         walker_spawn_point.location.y = 300
@@ -439,7 +433,6 @@ class Scenario:
 
         return "03_non_int", obstacles, end, start
 
-
     # CTS 3
     def scenario04_non_int(self):
         start = (2, 270, -90)
@@ -447,8 +440,8 @@ class Scenario:
         obstacles = []
 
         walker_bp = self.world.get_blueprint_library().filter("walker.pedestrian.0001")[0]
-        if walker_bp.has_attribute('is_invincible'):
-            walker_bp.set_attribute('is_invincible', 'false')
+        if walker_bp.has_attribute("is_invincible"):
+            walker_bp.set_attribute("is_invincible", "false")
         walker_spawn_point = carla.Transform()
         walker_spawn_point.location.x = -4.0
         walker_spawn_point.location.y = 203
@@ -519,3 +512,37 @@ class Scenario:
         obstacles.append(car)
 
         return "06_non_int", obstacles, end, start
+
+    def scenario01_multi(self):
+        start = (92.5, 300, -90)
+        end = (92.5, 200, -90)
+        obstacles = []
+
+        walker_bp = self.world.get_blueprint_library().filter("walker.pedestrian.0001")[0]
+        if walker_bp.has_attribute("is_invincible"):
+            walker_bp.set_attribute("is_invincible", "false")
+        walker_spawn_point = carla.Transform()
+        walker_spawn_point.location.x = 86
+        walker_spawn_point.location.y = 300
+        walker_spawn_point.location.z += 1.0
+        walker_spawn_point.rotation.yaw = 270.0
+        walker1 = [walker_bp, walker_spawn_point]
+        obstacles.append(walker1)
+
+        walker_bp = self.world.get_blueprint_library().filter("walker.pedestrian.0002")[0]
+        if walker_bp.has_attribute("is_invincible"):
+            walker_bp.set_attribute("is_invincible", "false")
+        walker_spawn_point.location.x -= 1.5
+        walker2 = [walker_bp, walker_spawn_point]
+        obstacles.append(walker2)
+
+        car_spawn_point = carla.Transform()
+        car_spawn_point.location.x = 4.8
+        car_spawn_point.location.y = 206
+        car_spawn_point.location.z = 0.5
+        car_spawn_point.rotation.yaw = 90
+        car_bp = self.world.get_blueprint_library().filter("vehicle.audi.tt")
+        car = [random.choice(car_bp), car_spawn_point]
+        obstacles.append(car)
+
+        return "01_multi", obstacles, end, start

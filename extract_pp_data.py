@@ -16,6 +16,7 @@ from config import Config
 import time
 
 from benchmark.environment.worlds.multi_01 import WorldMulti01
+from benchmark.environment.worlds.multi_02 import WorldMulti02
 
 
 def run(args):
@@ -33,10 +34,11 @@ def run(args):
         # "04_non_int",
         # "05_non_int",
         # "06_non_int",
-        "01_multi"
+        # ["01_multi", WorldMulti01],
+        ["02_multi", WorldMulti02],
     ]
 
-    for scenario in pre_safe_scenarios:
+    for scenario, world in pre_safe_scenarios:
         Config.scenarios = [scenario]
         print(Config.scenarios)
 
@@ -57,7 +59,7 @@ def run(args):
 
         print(p1_file)
         # Create environments.
-        env = GIDASBenchmark(port=Config.port, world_class=WorldMulti01)
+        env = GIDASBenchmark(port=Config.port, world_class=world)
         # agent = SAC(env.world, env.map, env.scene)
         # env.reset_agent(agent)
         # test_env = GIDASBenchmark(port=Config.port + 100, setting="special")

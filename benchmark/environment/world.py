@@ -1700,7 +1700,7 @@ class World(object):
         plan = []
         cur = position  # self.walker.get_location()
         for offset_x, offset_y in offsets:
-            loc = carla.Location(cur.x + offset_x, cur.y - offset_y, 0.5)
+            loc = carla.Location(cur.x + offset_x, cur.y - offset_y, cur.z)
             plan.append(loc)
             if not color is None:
                 self.world.debug.draw_point(loc, size=0.1, color=color, life_time=15)

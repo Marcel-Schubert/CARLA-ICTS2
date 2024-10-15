@@ -28,6 +28,7 @@ from config import (
     IConfig05,
     IConfig06,
     ConfigMulti01,
+    ConfigMulti02,
 )
 from benchmark.scenarios.scenario import Scenario
 
@@ -170,6 +171,11 @@ class GIDASBenchmark(gym.Env):
                 self.episodes.extend(ConfigMulti01().get_training())
                 self.val_episodes.extend(ConfigMulti01().get_validation())
                 self.test_episodes.extend(ConfigMulti01().get_test())
+
+            elif scenario == "02_multi":
+                self.episodes.extend(ConfigMulti02().get_training())
+                self.val_episodes.extend(ConfigMulti02().get_validation())
+                self.test_episodes.extend(ConfigMulti02().get_test())
 
             else:
                 # Used for backwards compatibility

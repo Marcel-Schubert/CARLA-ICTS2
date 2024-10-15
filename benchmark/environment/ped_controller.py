@@ -438,24 +438,43 @@ class TurnHeadRightBehindNoICR(object):
 
 
 class TurnHeadRightWalk(object):
-    def __init__(self, walker, start_pos=None, char="yielding"):
+    def __init__(self, walker, start_pos=None, end_pos=None, char="yielding"):
         self.walker = walker
         self.start_pos = start_pos
+        self.end_pos = end_pos
         self.done = False
+        self.started = False
         if char == "forcing":
             self.spine_roll = 90
         else:
             self.spine_roll = 40
-        # print(char)
 
     def step(self):
         if self.done:
             return "Done"
-        if not self.start_pos is None:
-            direction = self.walker.get_location() - self.start_pos
-            direction_norm = math.sqrt(direction.x**2 + direction.y**2)
-            if direction_norm > 0.1:
-                return "Running"
+
+        if self.start_pos is not None:
+            direction_start = self.walker.get_location() - self.start_pos
+            dist_to_start = l2_length(direction_start)
+            if dist_to_start > 0.1 and not self.started:
+                return "Waiting"
+
+        if self.end_pos is not None:
+            direction_end = self.walker.get_location() - self.end_pos
+            dist_to_end = l2_length(direction_end)
+            if dist_to_end < 0.1:
+                self.walker.blend_pose(0)
+                self.done = True
+                return "Done"
+
+        if self.started:
+            return "Running"
+
+        self.start_pose()
+        return "Running"
+
+    def start_pose(self):
+        self.started = True
         self.walker.icr = ICR.PLANNING_TO
         self.walker.son = self.walker.initial_son
         bones = self.walker.get_bones()
@@ -478,10 +497,8 @@ class TurnHeadRightWalk(object):
         control.bone_transforms = new_pose
         self.walker.set_bones(control)
         self.walker.blend_pose(0.25)
-        self.done = True
-        self.walker.on_street = True
-
-        return "Done"
+        ## Does this cause bugs in old scenes?
+        # self.walker.on_street = True
 
     def relax_spine(self):
         bones = self.walker.get_bones()

@@ -240,8 +240,8 @@ class AutoBotWrapperTwoPed:
             if did_epoch_better:
                 self.logger.info(f"Epoch {epoch} was better than last best epoch({last_best_epoch})")
                 last_best_epoch = epoch
-            if epoch - last_best_epoch > 10:
-                self.logger.info(f"Stopping training, no improvement in 10 epochs saved{last_best_epoch}")
+            if epoch - last_best_epoch > 50:
+                self.logger.info(f"Stopping training, no improvement in 50 epochs saved{last_best_epoch}")
                 break
             # self.optimiser_scheduler.step()
 

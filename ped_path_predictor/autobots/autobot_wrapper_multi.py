@@ -78,7 +78,7 @@ class AutoBotWrapperTwoPed:
             self.model.load_state_dict(torch.load(path))
 
         self.train_loader, self.test_loader, self.val_loader = getDataloadersMulti(
-            path_p1, path_p2, path_car, n_obs, n_pred, batch_size=batch_size, absolute=True
+            path_p1, path_p2, path_car, n_obs, n_pred, batch_size=batch_size
         )
 
         self.logger.info(f"Train-Batches {len(self.train_loader)}")
@@ -211,7 +211,8 @@ class AutoBotWrapperTwoPed:
                 )
 
                 self.optimiser.zero_grad()
-                (nll_loss + ade_fde_loss + kl_loss).backward()
+                # (nll_loss + ade_fde_loss + kl_loss).backward()
+                ade_fde_loss.backward()
                 nn.utils.clip_grad_norm_(self.model.parameters(), 5)
                 self.optimiser.step()
 

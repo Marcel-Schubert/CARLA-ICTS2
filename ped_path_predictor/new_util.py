@@ -44,12 +44,12 @@ def get_dat_sets(paths: list, n_obs, n_pred, absolute=False):
 
 
 class MultiDataset(Dataset):
-    def __init__(self, path_p1, path_p2, path_car, n_obs, n_pred, absolute=False) -> None:
+    def __init__(self, paths_p1, paths_p2, paths_car, n_obs, n_pred, absolute=False) -> None:
         super().__init__()
 
-        input_p1, output_p1 = get_dat_sets([path_p1], n_obs, n_pred, absolute=absolute)
-        input_p2, output_p2 = get_dat_sets([path_p2], n_obs, n_pred, absolute=absolute)
-        input_car, output_car = get_dat_sets([path_car], n_obs, n_pred, absolute=absolute)
+        input_p1, output_p1 = get_dat_sets(paths_p1, n_obs, n_pred, absolute=absolute)
+        input_p2, output_p2 = get_dat_sets(paths_p2, n_obs, n_pred, absolute=absolute)
+        input_car, output_car = get_dat_sets(paths_car, n_obs, n_pred, absolute=absolute)
 
         self.x = np.concatenate([input_p1, input_p2, input_car], axis=-1, dtype=np.float32)
         self.y = np.concatenate([output_p1, output_p2, output_car], axis=-1, dtype=np.float32)

@@ -18,9 +18,9 @@ from ped_path_predictor.autobots.AutoBots.models.autobot_joint import AutoBotJoi
 from ped_path_predictor.autobots.AutoBots.utils.train_helpers import nll_loss_multimodes_joint
 
 
-path_p1 = "./P3VI/data/01_multi_p1.npy"
-path_p2 = "./P3VI/data/01_multi_p2.npy"
-path_car = "./P3VI/data/01_multi_car.npy"
+paths_p1 = ["./P3VI/data/01_multi_p1.npy", "./P3VI/data/02_multi_p1.npy"]
+paths_p2 = ["./P3VI/data/01_multi_p2.npy", "./P3VI/data/02_multi_p2.npy"]
+paths_car = ["./P3VI/data/01_multi_car.npy", "./P3VI/data/02_multi_car.npy"]
 
 n_obs = 60
 n_pred = 80
@@ -78,7 +78,7 @@ class AutoBotWrapperTwoPed:
             self.model.load_state_dict(torch.load(path))
 
         self.train_loader, self.test_loader, self.val_loader = getDataloadersMulti(
-            path_p1, path_p2, path_car, n_obs, n_pred, batch_size=batch_size
+            paths_p1, paths_p2, paths_car, n_obs, n_pred, batch_size=batch_size
         )
 
         self.logger.info(f"Train-Batches {len(self.train_loader)}")
@@ -187,7 +187,7 @@ class AutoBotWrapperTwoPed:
         best_eval_fde = np.Inf
         last_best_epoch = 0
 
-        for epoch in range(0, 1000):
+        for epoch in range(0, 10000):
             print(f"Epoch {epoch}")
             did_epoch_better = False
 
@@ -240,8 +240,8 @@ class AutoBotWrapperTwoPed:
             if did_epoch_better:
                 self.logger.info(f"Epoch {epoch} was better than last best epoch({last_best_epoch})")
                 last_best_epoch = epoch
-            if epoch - last_best_epoch > 50:
-                self.logger.info(f"Stopping training, no improvement in 50 epochs saved{last_best_epoch}")
+            if epoch - last_best_epoch > 100:
+                self.logger.info(f"Stopping training, no improvement in 100 epochs saved{last_best_epoch}")
                 break
             # self.optimiser_scheduler.step()
 

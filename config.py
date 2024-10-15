@@ -6,6 +6,7 @@ import numpy as np
 class ControllerConfig:
     def __init__(self, ped_speed=1.0, ped_distance=30.0):
         self.ped_speed = ped_speed
+        self.car_speed = None
         self.ped_distance = ped_distance
         # Has to be initialized due weired initial call
         self.spawning_distance = 0
@@ -49,32 +50,27 @@ class ConfigMulti01(ScenarioConfig):
     def __init__(self):
         # self.ped_speed_range = [1.2,1.6]
         # self.spwaning_distances = [25,35]
-        self.ped_speed_range = [0.7, 1.0]  # 1.8
-        self.spwaning_distances = [47.5, 55.0]  # 28
-        self.crossing_distances = [3, 5]  # 3
-        self.car_avoid_X = [0.4, 1]
-        self.car_avoid_Y = [7, 8.5]
+        self.ped_speed_range = [1.2, 1.6]
+        self.car_speed_range = [5, 7]
+        self.spwaning_distances = [40, 80]  # [47.5, 55.0]
+        self.crossing_distances = [0, 0]
 
         self.character = ["forcing", "yielding"]
         super(ConfigMulti01, self).__init__()
 
     def get_scenes(self):
         scenes = []
-        for speed in np.arange(self.ped_speed_range[0], self.ped_speed_range[1] + 0.1, 0.1):
-            for spawning_distance in np.arange(self.spwaning_distances[0], self.spwaning_distances[1] + 2.5, 2.5):
-                for car_avoid_X in np.arange(self.car_avoid_X[0], self.car_avoid_X[1] + 0.2, 0.2):
-                    for car_avoid_Y in np.arange(self.car_avoid_Y[0], self.car_avoid_Y[1] + 0.5, 0.5):
-                        for crossing_distance in np.arange(
-                            self.crossing_distances[0], self.crossing_distances[1] + 1, 1
-                        ):
-                            for char in self.character:
-                                conf = ControllerConfig(speed)
-                                conf.spawning_distance = int(spawning_distance)
-                                conf.crossing_distance = crossing_distance
-                                conf.car_avoid_X = car_avoid_X
-                                conf.car_avoid_Y = car_avoid_Y
-                                conf.char = char
-                                scenes.append(("01_multi", conf))
+        for speed in np.arange(self.ped_speed_range[0], self.ped_speed_range[1] + 0.05, 0.1):
+            for car_speed in np.arange(self.car_speed_range[0], self.car_speed_range[1] + 0.1, 0.2):
+                for spawning_distance in np.arange(self.spwaning_distances[0], self.spwaning_distances[1] + 5, 5):
+                    for crossing_distance in np.arange(self.crossing_distances[0], self.crossing_distances[1] + 1, 1):
+                        for char in self.character:
+                            conf = ControllerConfig(speed)
+                            conf.car_speed = car_speed
+                            conf.spawning_distance = int(spawning_distance)
+                            conf.crossing_distance = crossing_distance
+                            conf.char = char
+                            scenes.append(("01_multi", conf))
         print("Total scenes count (multi-1): ", len(scenes))
         return scenes
 

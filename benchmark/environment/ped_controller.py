@@ -15,7 +15,6 @@ class PathController(object):
         self.done = False
 
     def step(self):
-
         if self.done:
             return "Done"
         actor_location = self.walker.get_location()
@@ -114,6 +113,7 @@ class LookBehindRight(object):
         self.done = True
         return "Done"
 
+
 class LookBehindLeftSpine(object):
     # Quick fix should be merged with LookBehindLeft
     def __init__(self, walker, start_pos, char):
@@ -166,6 +166,61 @@ class LookBehindLeftSpine(object):
         return "Done"
 
 
+class Greet(object):
+    def __init__(self, walker, start_pos, char, end_pos):
+        self.walker = walker
+        self.start_pos = start_pos
+        self.end_pos = end_pos
+        self.done = False
+        self.started = False
+
+    def step(self):
+        if self.done:
+            return "Done"
+
+        direction_start = self.walker.get_location() - self.start_pos
+        dist_to_start = l2_length(direction_start)
+        if dist_to_start > 0.1 and not self.started:
+            return "Waiting"
+
+        direction_end = self.walker.get_location() - self.end_pos
+        dist_to_end = l2_length(direction_end)
+        if dist_to_end < 0.1:
+            self.walker.blend_pose(0)
+            self.done = True
+            return "Done"
+
+        if self.started:
+            return "Running"
+
+        self.start_pose()
+        return "Running"
+
+    def start_pose(self):
+        self.started = True
+        bones = self.walker.get_bones()
+        new_pose = []
+
+        for bone in bones.bone_transforms:
+            if bone.name == "crl_arm__R":
+                bone.relative.rotation.pitch = 340
+                bone.relative.rotation.yaw = 220
+                bone.relative.rotation.roll = 200
+                new_pose.append((bone.name, bone.relative))
+            if bone.name == "crl_foreArm__R":
+                bone.relative.rotation.pitch = 160
+                bone.relative.rotation.yaw = 0
+                bone.relative.rotation.roll = 0
+                new_pose.append((bone.name, bone.relative))
+            else:
+                new_pose.append((bone.name, bone.relative))
+
+        control = carla.WalkerBoneControlIn()
+        control.bone_transforms = new_pose
+        self.walker.set_bones(control)
+        self.walker.blend_pose(0.5)
+
+
 class RaiseArm(object):
     def __init__(self, walker, start_pos, char, end_pos):
         self.walker = walker
@@ -187,12 +242,11 @@ class RaiseArm(object):
             return "Running"
 
         direction_end = self.walker.get_location() - self.end_pos
-        direction_norm_end = math.sqrt(direction_end.x ** 2 + direction_end.y ** 2)
+        direction_norm_end = math.sqrt(direction_end.x**2 + direction_end.y**2)
         if direction_norm_end < 0.2:
             self.walker.blend_pose(0)
             self.done = True
             return "Done"
-
 
         bones = self.walker.get_bones()
         new_pose = []
@@ -200,8 +254,8 @@ class RaiseArm(object):
         for bone in bones.bone_transforms:
             if bone.name == "crl_arm__R":
                 bone.relative.rotation.pitch -= 45
-            #     bone.relative.rotation.roll = 90
-            #     # bone.relative.rotation.yaw = 0
+                #     bone.relative.rotation.roll = 90
+                #     # bone.relative.rotation.yaw = 0
                 new_pose.append((bone.name, bone.relative))
             if bone.name == "crl_shoulder__R":
                 bone.relative.rotation.pitch -= -1
@@ -222,30 +276,28 @@ class RaiseArm(object):
 
         self.walker.blend_pose(0.7)
 
+        # if bone.name == "crl_neck__C":
+        #     roll = bone.relative.rotation.roll
+        #     if roll >170 and self.head_roll >0:
+        #         self.head_roll = -1
+        #     elif roll < 120 and self.head_roll < 0:
+        #         self.head_roll = 1
 
-            # if bone.name == "crl_neck__C":
-            #     roll = bone.relative.rotation.roll
-            #     if roll >170 and self.head_roll >0:
-            #         self.head_roll = -1
-            #     elif roll < 120 and self.head_roll < 0:
-            #         self.head_roll = 1
+        # bone.relative.rotation.roll += self.head_roll  # Changed from 30 to 10
+        # new_pose.append((bone.name, bone.relative))
 
-                # bone.relative.rotation.roll += self.head_roll  # Changed from 30 to 10
-                # new_pose.append((bone.name, bone.relative))
-
-            # Added new
-            # else:
-            #     # get current rotation
-            #     new_pose.append((bone.name, bone.relative))
-
+        # Added new
+        # else:
+        #     # get current rotation
+        #     new_pose.append((bone.name, bone.relative))
 
         # control = carla.WalkerBoneControlIn()
         # control.bone_transforms = new_pose
         # self.walker.set_bones(control)
         # self.walker.blend_pose(1.0)
 
-
         return "Done"
+
 
 class LookBehindLeft(object):
 
@@ -273,14 +325,14 @@ class LookBehindLeft(object):
                 bone.relative.rotation.roll += 0  # Added new
                 new_pose.append((bone.name, bone.relative))  # Added new
             if bone.name == "crl_spine01__C":
-                bone.relative.rotation.pitch -= 40*self.mult  # Changed from 50 to 13
+                bone.relative.rotation.pitch -= 40 * self.mult  # Changed from 50 to 13
                 new_pose.append((bone.name, bone.relative))
             if bone.name == "crl_neck__C":
-                bone.relative.rotation.pitch += 40*self.mult  # Changed from 30 to 10
+                bone.relative.rotation.pitch += 40 * self.mult  # Changed from 30 to 10
                 new_pose.append((bone.name, bone.relative))
             elif bone.name == "crl_Head__C":
-                bone.relative.rotation.pitch -= 40*self.mult  # Changed from 40 to 13
-                bone.relative.rotation.roll += 20*self.mult  # added new
+                bone.relative.rotation.pitch -= 40 * self.mult  # Changed from 40 to 13
+                bone.relative.rotation.roll += 20 * self.mult  # added new
                 bone.relative.rotation.yaw -= 0  # added new
                 new_pose.append((bone.name, bone.relative))
             else:
@@ -308,7 +360,7 @@ class TurnHeadRightBehind(object):
             if direction_norm > 0.2:
                 return "Running"
         self.walker.icr = ICR.INTERESTED
-        #print("TurnHeadRightBehind")
+        # print("TurnHeadRightBehind")
         bones = self.walker.get_bones()
         new_pose = []
         for bone in bones.bone_transforms:
@@ -354,7 +406,7 @@ class TurnHeadRightBehindNoICR(object):
             direction_norm = math.sqrt(direction.x**2 + direction.y**2)
             if direction_norm > 0.2:
                 return "Running"
-        #print("TurnHeadRightBehind")
+        # print("TurnHeadRightBehind")
         bones = self.walker.get_bones()
         new_pose = []
         for bone in bones.bone_transforms:
@@ -384,6 +436,7 @@ class TurnHeadRightBehindNoICR(object):
         self.done = True
         return "Done"
 
+
 class TurnHeadRightWalk(object):
     def __init__(self, walker, start_pos=None, char="yielding"):
         self.walker = walker
@@ -393,7 +446,7 @@ class TurnHeadRightWalk(object):
             self.spine_roll = 90
         else:
             self.spine_roll = 40
-        #print(char)
+        # print(char)
 
     def step(self):
         if self.done:
@@ -405,7 +458,6 @@ class TurnHeadRightWalk(object):
                 return "Running"
         self.walker.icr = ICR.PLANNING_TO
         self.walker.son = self.walker.initial_son
-        #print("TurnHeadRightWalk")
         bones = self.walker.get_bones()
         new_pose = []
         for bone in bones.bone_transforms:
@@ -436,7 +488,7 @@ class TurnHeadRightWalk(object):
         new_pose = []
         for bone in bones.bone_transforms:
             if bone.name == "crl_spine__C":  # Added new
-                bone.relative.rotation.roll -= self.spine_roll/2  # self.spine_roll
+                bone.relative.rotation.roll -= self.spine_roll / 2  # self.spine_roll
                 new_pose.append((bone.name, bone.relative))
         control = carla.WalkerBoneControlIn()
         control.bone_transforms = new_pose
@@ -453,7 +505,7 @@ class TurnHeadLeftWalk(object):
             self.spine_roll = 70
         else:
             self.spine_roll = 40
-        #print(char)
+        # print(char)
 
     def step(self):
         if self.done:
@@ -481,7 +533,7 @@ class TurnHeadLeftWalk(object):
                 new_pose.append((bone.name, bone.relative))
             else:
                 pass
-                #new_pose.append((bone.name, bone.relative))
+                # new_pose.append((bone.name, bone.relative))
         control = carla.WalkerBoneControlIn()
         control.bone_transforms = new_pose
         self.walker.set_bones(control)
@@ -496,7 +548,7 @@ class TurnHeadLeftWalk(object):
         new_pose = []
         for bone in bones.bone_transforms:
             if bone.name == "crl_spine__C":  # Added new
-                bone.relative.rotation.roll -= self.spine_roll/2  # self.spine_roll
+                bone.relative.rotation.roll -= self.spine_roll / 2  # self.spine_roll
                 new_pose.append((bone.name, bone.relative))
         control = carla.WalkerBoneControlIn()
         control.bone_transforms = new_pose
@@ -508,12 +560,13 @@ class TurnHeadLeftWalk(object):
         new_pose = []
         for bone in bones.bone_transforms:
             if bone.name == "crl_spine__C":  # Added new
-                bone.relative.rotation.roll += mult*self.spine_roll  # self.spine_roll
+                bone.relative.rotation.roll += mult * self.spine_roll  # self.spine_roll
                 new_pose.append((bone.name, bone.relative))
         control = carla.WalkerBoneControlIn()
         control.bone_transforms = new_pose
         self.walker.set_bones(control)
         self.walker.blend_pose(0.25)
+
 
 class LeanForward(object):
     def __init__(self, walker, start_pos):
@@ -529,7 +582,7 @@ class LeanForward(object):
             direction_norm = math.sqrt(direction.x**2 + direction.y**2)
             if direction_norm > 0.1:
                 return "Running"
-        
+
         self.walker.icr = ICR.GOING_TO
         self.walker.son = SON.FORCING
         bones = self.walker.get_bones()
@@ -540,13 +593,14 @@ class LeanForward(object):
                 new_pose.append((bone.name, bone.relative))
             else:
                 pass
-                #new_pose.append((bone.name, bone.relative))
+                # new_pose.append((bone.name, bone.relative))
         control = carla.WalkerBoneControlIn()
         control.bone_transforms = new_pose
         self.walker.set_bones(control)
         self.walker.blend_pose(0.25)
 
         return "Done"
+
 
 class ResetPose(object):
     def __init__(self, walker, start_pos=None, name="ResetPoseAt"):
@@ -568,14 +622,15 @@ class ResetPose(object):
         self.walker.blend_pose(0)
         return "Done"
 
-class InternalStateSetter():
+
+class InternalStateSetter:
     def __init__(self, walker, start_pos, icr, son) -> None:
         self.walker = walker
         self.start_pos = start_pos
         self.icr = icr
         self.son = son
         self.done = False
-    
+
     def step(self):
         if self.done:
             return "Done"
@@ -587,6 +642,7 @@ class InternalStateSetter():
         self.walker.icr = self.icr
         self.walker.son = self.son
         self.done = True
+
 
 class Relaxer(object):
     def __init__(self, walker, car, start_pos):
@@ -600,7 +656,7 @@ class Relaxer(object):
         car_loc = self.car.get_location()
         if self.done:
             return True
-        #print(y_distance(walker_loc, self.start_pos), y_distance(walker_loc, car_loc) )
+        # print(y_distance(walker_loc, self.start_pos), y_distance(walker_loc, car_loc) )
         if y_distance(walker_loc, self.start_pos) >= 0 and y_distance(walker_loc, car_loc) < 0:
             self.walker.blend_pose(0)
             self.done = True
@@ -629,9 +685,8 @@ class UncertainSteps(object):
         self.uncertain_steps_points = uncertain_steps_points
         self.done = False
         self.current_point = 0
-        self.start_direction = 1 if len(uncertain_steps_points)%2 > 0 else -1
+        self.start_direction = 1 if len(uncertain_steps_points) % 2 > 0 else -1
         self.lean = 0 if char == "yielding" else 70
-
 
     def step(self):
         if self.done:
@@ -639,7 +694,7 @@ class UncertainSteps(object):
 
         point = self.uncertain_steps_points[self.current_point]
         direction = self.walker.get_location() - point
-        direction_norm = math.sqrt(direction.x ** 2 + direction.y ** 2)
+        direction_norm = math.sqrt(direction.x**2 + direction.y**2)
         if direction_norm < 0.2:
 
             # LOOK LEFT
@@ -648,7 +703,7 @@ class UncertainSteps(object):
                 new_pose = []
                 for bone in bones.bone_transforms:
                     if bone.name == "crl_spine__C":  # Added new
-                        bone.relative.rotation.roll += self.lean   # Added new
+                        bone.relative.rotation.roll += self.lean  # Added new
                         new_pose.append((bone.name, bone.relative))  # Added new
                     if bone.name == "crl_neck__C":
                         bone.relative.rotation.pitch += 120  # Changed from 30 to 10
@@ -669,14 +724,13 @@ class UncertainSteps(object):
                 self.walker.icr = ICR.PLANNING_TO
                 self.walker.son = SON.FORCING
 
-
             # LOOK RIGHT
             elif self.start_direction == 1:
                 bones = self.walker.get_bones()
                 new_pose = []
                 for bone in bones.bone_transforms:
                     if bone.name == "crl_spine__C":  # Added new
-                        bone.relative.rotation.roll += self.lean   # Added new
+                        bone.relative.rotation.roll += self.lean  # Added new
                         new_pose.append((bone.name, bone.relative))  # Added new
                     if bone.name == "crl_neck__C":
                         bone.relative.rotation.pitch -= 120  # Changed from 30 to 10
@@ -699,17 +753,18 @@ class UncertainSteps(object):
             self.start_direction *= -1
             self.current_point += 1
 
-
         if self.current_point == len(self.uncertain_steps_points):
-                self.done = True
-                return "Done"
-            # self.done = True
-            # return "Done"
+            self.done = True
+            return "Done"
+        # self.done = True
+        # return "Done"
         return "Running"
 
-class ControllerConfig():
+
+class ControllerConfig:
     def __init__(self, ped_speed=1.0, ped_distance=30.0):
         self.ped_speed = ped_speed
+        self.car_speed = 0
         self.ped_distance = ped_distance
         # Has to be initialized due weired initial call
         self.spawning_distance = 0
@@ -718,7 +773,10 @@ class ControllerConfig():
         self.crossing_distance = 0
         self.reenter_distance = 0
         self.op_reenter_distance = 0
+        self.car_avoid_X = 0
+        self.car_avoid_Y = 0
         self.char = "yielding"
+
 
 class ICR(Enum):
     VERY_LOW = 1
@@ -727,10 +785,18 @@ class ICR(Enum):
     PLANNING_TO = 4
     GOING_TO = 5
 
+    def __float__(self):
+        return float(self.value)
+
+
 class SON(Enum):
     AVERTING = 1
     YIELDING = 2
     FORCING = 3
+
+    def __float__(self):
+        return float(self.value)
+
 
 def l2_distance(pos1, pos2):
     direction = pos1 - pos2
@@ -739,7 +805,7 @@ def l2_distance(pos1, pos2):
 
 
 def y_distance(pos1, pos2):
-    return pos2.y-pos1.y
+    return pos2.y - pos1.y
 
 
 def l2_length(pos1):

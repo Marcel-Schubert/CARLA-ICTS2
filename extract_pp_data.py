@@ -15,6 +15,8 @@ from benchmark.environment import GIDASBenchmark
 from config import Config
 import time
 
+from benchmark.environment.worlds.multi_01 import WorldMulti01
+
 
 def run(args):
 
@@ -55,7 +57,7 @@ def run(args):
 
         print(p1_file)
         # Create environments.
-        env = GIDASBenchmark(port=Config.port)
+        env = GIDASBenchmark(port=Config.port, world_class=WorldMulti01)
         # agent = SAC(env.world, env.map, env.scene)
         # env.reset_agent(agent)
         # test_env = GIDASBenchmark(port=Config.port + 100, setting="special")
@@ -116,18 +118,18 @@ def run(args):
                 np.save(car_file, save_data_car, allow_pickle=True)
                 print("Saved", i)
 
-        with open(p1_file, "rb") as f:
-            arr = np.load(f, allow_pickle=True)
-            print(arr[0])
-            print(len(arr))
-        with open(p2_file, "rb") as f:
-            arr = np.load(f, allow_pickle=True)
-            print(arr[0])
-            print(len(arr))
-        with open(car_file, "rb") as f:
-            arr = np.load(f, allow_pickle=True)
-            print(arr[0])
-            print(len(arr))
+        # with open(p1_file, "rb") as f:
+        #     arr = np.load(f, allow_pickle=True)
+        #     print(arr[0])
+        #     print(len(arr))
+        # with open(p2_file, "rb") as f:
+        #     arr = np.load(f, allow_pickle=True)
+        #     print(arr[0])
+        #     print(len(arr))
+        # with open(car_file, "rb") as f:
+        #     arr = np.load(f, allow_pickle=True)
+        #     print(arr[0])
+        #     print(len(arr))
         env.close()
 
 

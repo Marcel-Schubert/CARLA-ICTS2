@@ -70,6 +70,7 @@ class World(object):
         self.recording_start = 0
         self.constant_velocity_enabled = False
         self.current_map_layer = 0
+        self.dummy_car = False
         # TODO CHECK THIS OUT
         self.map_layer_names = [
             carla.MapLayer.NONE,
@@ -90,13 +91,12 @@ class World(object):
         self.ped_distance = None
         self.drawn = False
         self.camera = True
+        self.random = False
+        self.debug = False
         self.restart(scenario)
         self.world.on_tick(hud.on_world_tick)
         for _ in range(2):
             self.next_weather()
-        self.random = False
-        self.dummy_car = False
-        self.debug = True
 
     def get_car_blueprint(self):
         blueprint = random.choice(self.world.get_blueprint_library().filter(self._actor_filter))
@@ -159,39 +159,7 @@ class World(object):
         loc = carla.Location(cur.x + offset_x, cur.y - offset_y, 0.5)
         return loc
 
-    def restart(self, scenario, conf=ControllerConfig()):
-        self.scenario = scenario
-        self.ped_speed = conf.ped_speed
-        self.ped_distance = conf.ped_distance
-        self.counter = 0
-
-        # Keep same camera config if the camera manager exists.
-        cam_index = self.camera_manager.index if self.camera_manager is not None else 0
-        semseg_index = self.semseg_sensor.index if self.semseg_sensor is not None else 5
-        cam_pos_index = self.camera_manager.transform_index if self.camera_manager is not None else 5
-        semseg_pos_index = self.semseg_sensor.transform_index if self.semseg_sensor is not None else 5
-
-        # Spawn the player.
-        start = self.scenario[3]
-        spawn_point = carla.Transform()
-        spawn_point.location.x = start[0]
-        spawn_point.location.y = start[1]
-        spawn_point.location.z = 0.01
-        spawn_point.rotation.yaw = start[2]
-        if self.player is not None:
-            self.destroy()
-            self.player = self.world.try_spawn_actor(self.car_blueprint, spawn_point)
-            self.modify_vehicle_physics(self.player)
-        while self.player is None:
-            if not self.map.get_spawn_points():
-                print("There are no spawn points available in your map/town.")
-                print("Please add some Vehicle Spawn Point to your UE4 scene.")
-                sys.exit(1)
-            self.player = self.world.try_spawn_actor(self.car_blueprint, spawn_point)
-            # self.world.wait_for_tick()
-            self.modify_vehicle_physics(self.player)
-
-        # Set up other agents
+    def restart_scenario_specific(self, scenario, conf):
         scenario_type = self.scenario[0]
         obstacles = self.scenario[1]
         # print(obstacles[0][1])
@@ -263,20 +231,6 @@ class World(object):
         if scenario_type == "06_int":
             self.choice = None
             self.setup_06_int(obstacles, conf)
-            cam_transform = carla.Transform(
-                carla.Location(spawn_point.location.x, spawn_point.location.y - 25, spawn_point.location.z + 7),
-                carla.Rotation(-30, 270, 0),
-            )
-            self.world.get_spectator().set_transform(cam_transform)
-            # p = self.player.get_location()
-            # print(p)
-            # self.world.debug.draw_point(p+carla.Location(0,-2,2), size=0.1, color=carla.Color(r=0,g=255,b=255), life_time=0)
-            if not self.random:
-                self.player.set_target_velocity(carla.Vector3D(0, -6, 0))
-
-        if scenario_type == "01_multi":
-            self.choice = None
-            self.setup_01_multi(obstacles, conf)
             cam_transform = carla.Transform(
                 carla.Location(spawn_point.location.x, spawn_point.location.y - 25, spawn_point.location.z + 7),
                 carla.Rotation(-30, 270, 0),
@@ -408,6 +362,49 @@ class World(object):
         elif scenario_type == 0:
             self.walker = self.world.try_spawn_actor(obstacles[0][0], obstacles[0][1])
 
+    def restart(self, scenario, conf=ControllerConfig()):
+        self.scenario = scenario
+        self.ped_speed = conf.ped_speed
+        self.ped_distance = conf.ped_distance
+        self.counter = 0
+
+        # Keep same camera config if the camera manager exists.
+        cam_index = self.camera_manager.index if self.camera_manager is not None else 0
+        semseg_index = self.semseg_sensor.index if self.semseg_sensor is not None else 5
+        cam_pos_index = self.camera_manager.transform_index if self.camera_manager is not None else 5
+        semseg_pos_index = self.semseg_sensor.transform_index if self.semseg_sensor is not None else 5
+
+        # Spawn the player.
+        start = self.scenario[3]
+        spawn_point = carla.Transform()
+        spawn_point.location.x = start[0]
+        spawn_point.location.y = start[1]
+        spawn_point.location.z = 0.01
+        spawn_point.rotation.yaw = start[2]
+        self.spawn_point = spawn_point
+        if self.player is not None:
+            self.destroy()
+            self.player = self.world.try_spawn_actor(self.car_blueprint, spawn_point)
+            self.modify_vehicle_physics(self.player)
+        while self.player is None:
+            if not self.map.get_spawn_points():
+                print("There are no spawn points available in your map/town.")
+                print("Please add some Vehicle Spawn Point to your UE4 scene.")
+                sys.exit(1)
+            self.player = self.world.try_spawn_actor(self.car_blueprint, spawn_point)
+            # self.world.wait_for_tick()
+            self.modify_vehicle_physics(self.player)
+
+        # Set up other agents
+        self.restart_scenario_specific(scenario, conf)
+
+        # Keep same camera config if the camera manager exists.
+        cam_index = self.camera_manager.index if self.camera_manager is not None else 0
+        semseg_index = self.semseg_sensor.index if self.semseg_sensor is not None else 5
+        cam_pos_index = self.camera_manager.transform_index if self.camera_manager is not None else 5
+        semseg_pos_index = self.semseg_sensor.transform_index if self.semseg_sensor is not None else 5
+
+        scenario_type = scenario[0]
         # Set up the sensors.
         ### Set walker flags ##
         self.walker.on_street = False
@@ -844,25 +841,6 @@ class World(object):
 
             self.relaxer.step()
 
-        if self.scenario[0] == "01_multi":
-            status = self.path_controller_1.step()
-            if self.dummy_car:
-                self.car_controller.step()
-            status_w2 = self.path_controller_w2_1.step()
-            # self.look_behind_right.step()
-
-            # self.turn_head.step()
-
-            if status == "Done":
-                self.raise_arm.step()
-                self.reset.step()
-                self.path_controller_2.step()
-
-            self.iss_crossed.step()
-            self.iss_crossed_2.step()
-
-            self.relaxer.step()
-
         if self.scenario[0] == "01_non_int":
             self.path_controller_1.step()
             self.look_behind_right.step()
@@ -942,10 +920,12 @@ class World(object):
         x, y = loc.x, loc.y
         return (x, y, self.walker2.icr, self.walker2.son)
 
-    def set_walker_speed_relative(self, per):
-        control = self.walker.get_control()
+    def set_walker_speed_relative(self, per, walker=None):
+        if walker == None:
+            walker: carla.Walker = self.walker
+        control = walker.get_control()
         control.speed = per * control.speed
-        self.walker.apply_control(control)
+        walker.apply_control(control)
 
     def get_car_state(self):
         loc = self.player.get_location()
@@ -1716,106 +1696,6 @@ class World(object):
                 self.player, breaking_point, speed=speed - 1 if car_behave else speed - 0.5, yielding=car_behave
             )
 
-    def setup_01_multi(self, obstacles, conf):
-
-        spawning_distance = conf.spawning_distance
-        crossing_distance = conf.crossing_distance
-        car_avoid_X = conf.car_avoid_X
-        car_avoid_Y = conf.car_avoid_Y
-
-        street_delta = 3 if conf.char == "yielding" else 5
-
-        if self.dummy_car:
-            self.db = [-1, 5 + car_avoid_Y] if conf.char == "yielding" else [-1, 10]
-        else:
-            self.db = [-1, car_avoid_Y + 2] if conf.char == "yielding" else [-1, 5]
-
-        mult = 1.0 if conf.char == "yielding" else 1.1 * 1.1 * 1.1
-
-        # print(spawning_distance)
-        # print(carla.Location(0,-spawning_distance,0))
-        # print(obstacles[0][1].location )
-        base_loc = obstacles[0][1].location + carla.Location(0, -spawning_distance, 0)
-        spawn_loc = base_loc  # + carla.Location(-5,0,0)
-        spawn_loc_w2 = base_loc + carla.Location(-1.5, 0, 0)
-        self.walker = self.world.try_spawn_actor(obstacles[0][0], carla.Transform(spawn_loc, obstacles[0][1].rotation))
-        self.walker.apply_control(carla.WalkerControl(carla.Vector3D(0, 0, 0), self.ped_speed))
-        self.walker2 = self.world.try_spawn_actor(
-            obstacles[1][0], carla.Transform(spawn_loc_w2, obstacles[1][1].rotation)
-        )
-        self.walker2.apply_control(carla.WalkerControl(carla.Vector3D(0, 0, 0), self.ped_speed))
-
-        self.walker.icr = ICR.GOING_TO
-        self.walker.son = SON.FORCING if conf.char == "forcing" else SON.YIELDING
-
-        self.walker2.icr = ICR.VERY_LOW
-        self.walker2.son = SON.YIELDING
-
-        self.world.tick()
-
-        # Walk to the middel of the road
-        offsets_1 = [(0, 10), (1, 11)]
-        path_1 = self._compute_plans(offsets_1, base_loc, color=carla.Color(r=255, g=0, b=0) if self.debug else None)
-        self.path_controller_1 = PathController(self.world, self.walker, path_1, self.ped_speed)
-
-        # Walk to the other side of the road
-        offsets_2 = [(12, 11), (12, 20)]
-        self.path_2 = self._compute_plans(
-            offsets_2, base_loc, color=carla.Color(r=0, g=255, b=0) if self.debug else None
-        )
-        self.path_controller_2 = PathController(self.world, self.walker, self.path_2, self.ped_speed * mult)
-
-        path_w2 = self._compute_plans(
-            [(0, 100)], spawn_loc_w2, color=carla.Color(r=0, g=0, b=255) if self.debug else None
-        )
-        self.path_controller_w2_1 = PathController(self.world, self.walker2, path_w2, self.ped_speed)
-
-        turn_p = self.get_point((0, 0))
-        self.turn_head = TurnHeadRightBehind(self.walker, turn_p)
-
-        self.look_behind_right = LookBehindRight(self.walker, path_1[0], conf.char)
-        self.turning_point = self.get_p_from_vector(path_1[0], path_1[0], 0.1)
-        self.raise_arm = RaiseArm(
-            self.walker, path_1[0], "forcing", self.get_p_from_vector(path_1[0], self.path_2[0], 0.5)
-        )
-        self.look_behind_left = LookBehindLeft(self.walker, mult=2)
-        self.reset = ResetPose(self.walker)
-
-        vec = path_1[0] - path_1[0]
-        self.desc_p = path_1[0] + 0.95 * vec
-        # self.db = [2,10]
-        if conf.char == "forcing":
-            self.path_controller_2.speed_schedule = [
-                (path_1[0] + per * path_1[0] - carla.Location(1, 0, 0), 10.9) for per in [0.0, 0.2, 0.4]
-            ]
-        if conf.char == ("yielding"):
-            self.path_controller_1.speed_schedule = [
-                (path_1[0] - per * path_1[0] - carla.Location(1, 0, 0), 0.8) for per in [0.0, 0.2, 0.4]
-            ]
-        # self._draw_db_circle()
-        if self.debug:
-            # self.world.debug.draw_point(path_1[0] + 0.2 * vec, size=0.1, color=carla.Color(r=0, g=255, b=255),
-            #                             life_time=0)
-            self._draw_grid()
-            self._draw_db()
-        self.relaxer = Relaxer(self.walker, self.player, path_1[0] + 0.2 * vec)
-
-        self.walker.initial_son = SON.YIELDING if conf.char == "yielding" else SON.FORCING
-        self.iss_crossed = InternalStateSetter(self.walker, self.path_2[0], icr=ICR.VERY_LOW, son=SON.AVERTING)
-        self.iss_crossed_2 = InternalStateSetter(self.walker, self.path_2[0], icr=ICR.VERY_LOW, son=SON.AVERTING)
-
-        player_loc = self.player.get_location()
-        breaking_point = carla.Location(player_loc.x, self.desc_p.y + self.db[0], 0.5)
-        car_behave = conf.char == "forcing"
-        car_to_desc = self.player.get_location().y - self.desc_p.y - self.db[1]
-        ped_to_desc = l2_distance(self.walker.get_location(), self.desc_p)
-        ped_time = ped_to_desc / self.ped_speed
-        speed = car_to_desc / ped_time
-        if self.dummy_car:
-            self.car_controller = CarController(
-                self.player, breaking_point, speed=speed - 1 if car_behave else speed - 0.5, yielding=car_behave
-            )
-
     def _compute_plans(self, offsets, position, color=None):
         plan = []
         cur = position  # self.walker.get_location()
@@ -1823,7 +1703,7 @@ class World(object):
             loc = carla.Location(cur.x + offset_x, cur.y - offset_y, 0.5)
             plan.append(loc)
             if not color is None:
-                self.world.debug.draw_point(loc, size=0.1, color=color, life_time=0)
+                self.world.debug.draw_point(loc, size=0.1, color=color, life_time=15)
         return plan
 
     def _draw_circle(self, loc, radius):
@@ -1840,10 +1720,10 @@ class World(object):
             db = self.db
         left = carla.Location(83, self.desc_p.y + db[0], 0.5)
         right = carla.Location(103, self.desc_p.y + db[0], 0.5)
-        self.world.debug.draw_line(left, right, thickness=0.05, color=color)
+        self.world.debug.draw_line(left, right, thickness=0.05, color=color, life_time=1)
         left = carla.Location(83, self.desc_p.y + db[1], 0.5)
         right = carla.Location(103, self.desc_p.y + db[1], 0.5)
-        self.world.debug.draw_line(left, right, thickness=0.05, color=color)
+        self.world.debug.draw_line(left, right, thickness=0.05, color=color, life_time=1)
 
     def compute_collision_point(self):
         walker_loc = self.walker.get_location()

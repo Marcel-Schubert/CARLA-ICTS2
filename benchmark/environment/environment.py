@@ -8,6 +8,7 @@ from PIL import Image
 import time
 import matplotlib.pyplot as plt
 from benchmark.environment.world import World
+from benchmark.environment.worlds.multi_01 import WorldMulti01
 from benchmark.environment.hud import HUD
 from benchmark.learner_example import Learner
 import timeit
@@ -32,7 +33,7 @@ from benchmark.scenarios.scenario import Scenario
 
 
 class GIDASBenchmark(gym.Env):
-    def __init__(self, port=Config.port, mode="TRAINING", setting="normal", record=False):
+    def __init__(self, port=Config.port, mode="TRAINING", setting="normal", record=False, world_class=World):
         super(GIDASBenchmark, self).__init__()
         random.seed(100)
         self.action_space = gym.spaces.Discrete(Config.N_DISCRETE_ACTIONS)
@@ -73,7 +74,7 @@ class GIDASBenchmark(gym.Env):
         print("Loaded ")
         # time.sleep(5)
         # wld.unload_map_layer(carla.MapLayer.StreetLights)
-        # wld.unload_map_layer(carla.MapLayer.Props)
+        # wld.unload_map_layer(carla.MapLayer.Props)s
         # wld.unload_map_layer(carla.MapLayer.Particles)
         self.map = wld.get_map()
         settings = wld.get_settings()
@@ -83,8 +84,8 @@ class GIDASBenchmark(gym.Env):
         wld.apply_settings(settings)
 
         self.scene_generator = Scenario(wld)
-        self.scene = self.scene_generator.scenario01()
-        self.world = World(wld, hud, self.scene, Config)
+        self.scene = self.scene_generator.scenario01_multi()
+        self.world = world_class(wld, hud, self.scene, Config)
         # self.planner_agent = RLAgent(self.world, self.map, self.scene)
         self.planner_agent = Learner(self.world, self.map, self.scene)
 

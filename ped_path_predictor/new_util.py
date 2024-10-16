@@ -229,9 +229,9 @@ def getDataloaders(
     return train_dataloader, test_dataloader, val_dataloader
 
 
-def getDataloadersMulti(path_p1, path_p2, path_car, n_obs, n_pred, batch_size=64, absolute=False):
+def getDataloadersMulti(paths_p1, paths_p2, paths_car, n_obs, n_pred, batch_size=64, absolute=False):
 
-    dataset = MultiDataset(path_p1, path_p2, path_car, n_obs, n_pred, absolute=absolute)
+    dataset = MultiDataset(paths_p1, paths_p2, paths_car, n_obs, n_pred, absolute=absolute)
 
     train_size = int(0.7 * len(dataset))
     test_size = len(dataset) - train_size

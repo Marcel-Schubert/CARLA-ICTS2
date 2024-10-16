@@ -95,8 +95,8 @@ class GroupNetWrapper:
 
         self.model = GroupNet(args, "cuda:0").cuda()
 
-        self.optimiser = optim.Adam(self.model.parameters(), lr=lr, eps=1e-4)
-        self.optimiser_scheduler = MultiStepLR(self.optimiser, milestones=[5, 10, 15, 20], gamma=0.5, verbose=True)
+        self.optimiser = optim.AdamW(self.model.parameters(), lr=lr, eps=1e-4)
+        # self.optimiser_scheduler = MultiStepLR(self.optimiser, milestones=[5, 10, 15, 20], gamma=0.5, verbose=True)
 
         if path is not None:
             self.model.load_state_dict(torch.load(path))
@@ -163,7 +163,7 @@ class GroupNetWrapper:
         best_eval_fde = np.Inf
         last_best_epoch = 0
 
-        for epoch in range(0, 1000):
+        for epoch in range(0, 10000):
             print(f"Epoch {epoch}")
             did_epoch_better = False
 
@@ -203,8 +203,8 @@ class GroupNetWrapper:
             if did_epoch_better:
                 self.logger.info(f"Epoch {epoch} was better than last best epoch({last_best_epoch})")
                 last_best_epoch = epoch
-            if epoch - last_best_epoch > 10:
-                self.logger.info(f"Stopping training, no improvement in 10 epochs saved{last_best_epoch}")
+            if epoch - last_best_epoch > 100:
+                self.logger.info(f"Stopping training, no improvement in 100 epochs saved{last_best_epoch}")
                 break
             self.optimiser_scheduler.step()
 

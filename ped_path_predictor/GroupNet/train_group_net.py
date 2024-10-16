@@ -206,7 +206,7 @@ class GroupNetWrapper:
             if epoch - last_best_epoch > 100:
                 self.logger.info(f"Stopping training, no improvement in 100 epochs saved{last_best_epoch}")
                 break
-            self.optimiser_scheduler.step()
+            # self.optimiser_scheduler.step()
 
     def eval(self, dataloader):
         eval_loss = 0
